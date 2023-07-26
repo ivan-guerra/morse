@@ -45,4 +45,5 @@ add_link_options(
     "$<$<CONFIG:Debug>:-fsanitize=address>"
 )
 
+add_subdirectory(docs)
 add_subdirectory(src)

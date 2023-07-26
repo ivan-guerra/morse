@@ -15,4 +15,4 @@ tags
 compile_commands.json
 
 # Ignore the docs.
-docs/neo
+docs/morse
