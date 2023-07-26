@@ -27,7 +27,8 @@ Main()
               -DBUILD_DOCS=$BUILD_DOCS \
               -DCMAKE_BUILD_TYPE=$BUILD_TYPE && \
         make -j$(nproc) all                  && \
-        make install
+        make install                         && \
+        cp $MORSE_RES_DIR/*.wav $MORSE_BIN_DIR
 
         # Exit if any of the above commands fails.
         if [ $? -ne 0 ];
