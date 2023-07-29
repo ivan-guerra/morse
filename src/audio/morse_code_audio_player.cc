@@ -65,7 +65,7 @@ MorseCodeAudioPlayer::MorseCodeAudioPlayer(const std::string& dot_wav,
      * https://wiki.libsdl.org/SDL2_mixer/Mix_OpenAudio */
     const int kDefaultFrequencyHz = 48000;
     const Uint16 kDefaultFormat = AUDIO_S16SYS;
-    const int kDefaultNumChannels = 2; /* 2 = stereo */
+    const int kDefaultNumChannels = 1; /* 1 = mono */
     const int kDefaultChunkSize = 2048;
     if (Mix_OpenAudio(kDefaultFrequencyHz, kDefaultFormat, kDefaultNumChannels,
                       kDefaultChunkSize)) {
