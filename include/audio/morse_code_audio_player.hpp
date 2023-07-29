@@ -39,6 +39,12 @@ class MorseCodeAudioPlayer {
     /** @brief Play the dash soundbite. */
     void PlayDash() const { PlayWav(MorseSymbol::kDash); }
 
+    /** @brief Returns the duration of the dot soundbite in seconds. */
+    double DotDuration() const { return dot_duration_sec_; }
+
+    /** @brief Returns the duration of the dash soundbite in seconds. */
+    double DashDuration() const { return dash_duration_sec_; }
+
    private:
     enum class MorseSymbol {
         kDot,
@@ -46,9 +52,12 @@ class MorseCodeAudioPlayer {
     };
 
     void PlayWav(MorseSymbol symbol) const;
+    double GetWavDurationSec(const std::string& wav_filename) const;
 
     Mix_Chunk* dot_;
     Mix_Chunk* dash_;
+    double dot_duration_sec_;
+    double dash_duration_sec_;
 };
 
 }  // namespace morse
