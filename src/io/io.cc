@@ -23,7 +23,7 @@ static std::vector<std::string> ParseWords(const std::string& data) {
 std::vector<std::string> ReadWords() {
     std::string data;
     std::string line;
-    while (std::cin >> line) {
+    while (std::getline(std::cin, line)) {
         data += line;
     }
     return ParseWords(data);
