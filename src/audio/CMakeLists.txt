@@ -12,6 +12,7 @@ add_library(${PROJECT_NAME} STATIC)
 
 target_sources(${PROJECT_NAME}
     PRIVATE morse_code_audio_player.cc
+    PRIVATE beeper.cc
 )
 
 target_include_directories(${PROJECT_NAME}
