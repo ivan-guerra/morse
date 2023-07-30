@@ -31,12 +31,12 @@ std::vector<std::string> ReadWords() {
 
 std::vector<std::string> ReadWords(const std::string& filepath) {
     if (!std::filesystem::exists(filepath)) {
-        std::runtime_error("error '" + filepath + "' does not exist");
+        std::runtime_error("'" + filepath + "' does not exist");
     }
 
     std::ifstream input_file(filepath);
     if (!input_file) {
-        throw std::runtime_error("error '" + filepath + "' cannot be opened");
+        throw std::runtime_error("'" + filepath + "' cannot be opened");
     }
 
     std::stringstream buffer;
@@ -48,7 +48,7 @@ std::vector<std::string> ReadWords(const std::string& filepath) {
 void WriteToFile(const std::string& data, const std::string& filepath) {
     std::ofstream output_file(filepath);
     if (!output_file) {
-        throw std::runtime_error("error '" + filepath + "' cannot be opened");
+        throw std::runtime_error("'" + filepath + "' cannot be opened");
     }
 
     output_file << data;
