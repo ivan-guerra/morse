@@ -2,12 +2,17 @@
 
 #include <unistd.h>
 
+#include <cctype>
 #include <string>
 #include <unordered_map>
 
 #include "audio/morse_code_audio_player.hpp"
 
 namespace morse {
+
+static char SafeToLower(char ch) {
+    return static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+}
 
 const std::unordered_map<char, std::string> Translator::kMorseToAscii = {
     {'a', ".-"},    {'b', "-..."},  {'c', "-.-."},  {'d', "-.."},
@@ -35,8 +40,9 @@ Translator::Translator(double frequency_hz, int duration_ms)
 void Translator::ToAudio(const std::vector<std::string>& words) {
     for (const std::string& word : words) {
         for (const char& c : word) {
-            if (kMorseToAscii.count(c)) {
-                for (const char& morse_char : kMorseToAscii.at(c)) {
+            char ascii_char = SafeToLower(c);
+            if (kMorseToAscii.count(ascii_char)) {
+                for (const char& morse_char : kMorseToAscii.at(ascii_char)) {
                     if ('.' == morse_char) {
                         player_.PlayDot();
                     } else {
@@ -55,8 +61,9 @@ std::string Translator::ToCode(const std::vector<std::string>& words) const {
     std::string translation;
     for (const std::string& word : words) {
         for (const char& c : word) {
-            if (kMorseToAscii.count(c)) {
-                for (const char& morse_char : kMorseToAscii.at(c)) {
+            char ascii_char = SafeToLower(c);
+            if (kMorseToAscii.count(ascii_char)) {
+                for (const char& morse_char : kMorseToAscii.at(ascii_char)) {
                     translation += morse_char;
                 }
             } else {
