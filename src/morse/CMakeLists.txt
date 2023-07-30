@@ -6,6 +6,11 @@ target_sources(${CMAKE_PROJECT_NAME}
     PRIVATE morse.cc
 )
 
+target_link_libraries(${CMAKE_PROJECT_NAME}
+    PRIVATE io
+    PRIVATE translator
+)
+
 install(TARGETS ${CMAKE_PROJECT_NAME}
     RUNTIME DESTINATION ${MORSE_BIN_DIR}
 )
