@@ -15,21 +15,23 @@ namespace morse {
 class Translator {
    public:
     /**
-     * @brief Construct a translator with the paramater dot/dash soundbites.
+     * @brief Construct a ASCII to Morse code text/audio translator.
      *
-     * @param [in] dot_wav Path to dot soundbite.
-     * @param [in] dash_wav Path to dash soundbite.
+     * @param [in] frequency_hz Frequency or pitch of dot/dash sounds in Hertz.
+     * @param [in] duration_hz Duration of a dot sound in milliseconds. By
+     *                         default, the duration of a dash is 3x the
+     *                         duration of a dot.
      *
-     * @throws std::runtime_error When either audio file cannot be loaded.
+     * @throws std::runtime_error When the audio system cannot be initialized.
      */
-    Translator(const std::string& dot_wav, const std::string& dash_wav);
-    ~Translator() = default;
+    explicit Translator(double frequency_hz = kDefaultFrequencyHz,
+                        int duration_ms = kDefaultDurationMs);
 
-    Translator() = delete;
-    Translator(const Translator&) = delete;
-    Translator& operator=(const Translator&) = delete;
-    Translator(Translator&&) = delete;
-    Translator& operator=(Translator&&) = delete;
+    ~Translator() = default;
+    Translator(const Translator&) = default;
+    Translator& operator=(const Translator&) = default;
+    Translator(Translator&&) = default;
+    Translator& operator=(Translator&&) = default;
 
     /**
      * @brief Play \p words as Morse audio over the host's speakers.
@@ -41,7 +43,7 @@ class Translator {
      *
      * @param [in] words A list of words.
      */
-    void ToAudio(const std::vector<std::string>& words) const;
+    void ToAudio(const std::vector<std::string>& words);
 
     /**
      * @brief Return the Morse encoding of \p words.
@@ -60,15 +62,16 @@ class Translator {
 
    private:
     static const std::unordered_map<char, std::string> kMorseToAscii;
+    static const double kDefaultFrequencyHz;
+    static const int kDefaultDurationMs;
 
     enum DelayMultiplier : int {
-        kDot = 5,
-        kChar = 6,
+        kSymbol = 1,
+        kChar = 3,
         kWord = 7,
     };
 
-    void Delay(double delay_sec) const;
-    void PlaySound(char morse_char) const;
+    void Delay(int delay_ms) const;
 
     MorseCodeAudioPlayer player_;
 };

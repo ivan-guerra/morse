@@ -1,9 +1,7 @@
 #ifndef MORSE_CODE_AUDIO_PLAYER_HPP_
 #define MORSE_CODE_AUDIO_PLAYER_HPP_
 
-#include <SDL2/SDL_mixer.h>
-
-#include <string>
+#include "audio/beeper.hpp"
 
 namespace morse {
 
@@ -13,51 +11,51 @@ namespace morse {
 class MorseCodeAudioPlayer {
    public:
     /**
-     * @brief Construct an audio player that uses the parameter dot/dash audio.
+     * @brief Construct a Morse code dot/dash audio player.
      *
-     * @param [in] dot_wav Path to a dot audio WAV file.
-     * @param [in] dash_wav Path to a dash audio WAV file.
+     * @param [in] frequency_hz Frequency or pitch of dot/dash sounds in Hertz.
+     * @param [in] duration_hz Duration of a dot sound in milliseconds. By
+     *                         default, the duration of a dash is 3x the
+     *                         duration of a dot.
      *
-     * @throws std::runtime_error Signals an irrecoverable error in the audio
-     *                            player's construction. The what() message will
-     *                            report the error identified by the underlying
-     *                            SDL2 lib.
+     * @throws std::runtime_error When the audio system cannot be initialized.
      */
-    MorseCodeAudioPlayer(const std::string& dot_wav,
-                         const std::string& dash_wav);
-    ~MorseCodeAudioPlayer();
+    explicit MorseCodeAudioPlayer(double frequency_hz = kDefaultFrequencyHz,
+                                  int duration_ms = kDefaultDurationMs);
 
-    MorseCodeAudioPlayer() = delete;
-    MorseCodeAudioPlayer(const MorseCodeAudioPlayer&) = delete;
-    MorseCodeAudioPlayer& operator=(const MorseCodeAudioPlayer&) = delete;
-    MorseCodeAudioPlayer(MorseCodeAudioPlayer&&) = delete;
-    MorseCodeAudioPlayer& operator=(MorseCodeAudioPlayer&&) = delete;
+    ~MorseCodeAudioPlayer() = default;
+    MorseCodeAudioPlayer(const MorseCodeAudioPlayer&) = default;
+    MorseCodeAudioPlayer& operator=(const MorseCodeAudioPlayer&) = default;
+    MorseCodeAudioPlayer(MorseCodeAudioPlayer&&) = default;
+    MorseCodeAudioPlayer& operator=(MorseCodeAudioPlayer&&) = default;
 
     /** @brief Play the dot soundbite. */
-    void PlayDot() const { PlayWav(MorseSymbol::kDot); }
+    void PlayDot() { PlayMorseCodeSound(MorseSymbol::kDot); }
 
     /** @brief Play the dash soundbite. */
-    void PlayDash() const { PlayWav(MorseSymbol::kDash); }
+    void PlayDash() { PlayMorseCodeSound(MorseSymbol::kDash); }
 
-    /** @brief Returns the duration of the dot soundbite in seconds. */
-    double DotDuration() const { return dot_duration_sec_; }
+    /** @brief Returns the duration of the dot soundbite in milliseconds. */
+    int DotDuration() const { return dot_duration_ms_; }
 
-    /** @brief Returns the duration of the dash soundbite in seconds. */
-    double DashDuration() const { return dash_duration_sec_; }
+    /** @brief Returns the duration of the dash soundbite in milliseconds. */
+    int DashDuration() const { return dash_duration_ms_; }
 
    private:
+    static const double kDefaultFrequencyHz;
+    static const int kDefaultDurationMs;
+
     enum class MorseSymbol {
         kDot,
         kDash,
     };
 
-    void PlayWav(MorseSymbol symbol) const;
-    double GetWavDurationSec(const std::string& wav_filename) const;
+    void PlayMorseCodeSound(MorseSymbol symbol);
 
-    Mix_Chunk* dot_;
-    Mix_Chunk* dash_;
-    double dot_duration_sec_;
-    double dash_duration_sec_;
+    double frequency_hz_;
+    int dot_duration_ms_;
+    int dash_duration_ms_;
+    Beeper beeper_;
 };
 
 }  // namespace morse

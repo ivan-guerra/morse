@@ -21,38 +21,33 @@ const std::unordered_map<char, std::string> Translator::kMorseToAscii = {
     {'6', "-...."}, {'7', "--..."}, {'8', "---.."}, {'9', "----."},
 };
 
-void Translator::Delay(double delay_sec) const {
-    static const double kSecToUsec = 1000000.0;
-    usleep(static_cast<unsigned int>(delay_sec * kSecToUsec));
+const double Translator::kDefaultFrequencyHz = 500;
+const int Translator::kDefaultDurationMs = 100;
+
+void Translator::Delay(int delay_ms) const {
+    static const int kMsToUsec = 1000;
+    usleep(delay_ms * kMsToUsec);
 }
 
-void Translator::PlaySound(char morse_char) const {
-    static const char kDot = '.';
-    static const char kDash = '-';
-    if (morse_char == kDot) {
-        player_.PlayDot();
-    } else if (morse_char == kDash) {
-        player_.PlayDash();
-    }
-    Delay(player_.DotDuration() * static_cast<double>(DelayMultiplier::kDot));
-}
+Translator::Translator(double frequency_hz, int duration_ms)
+    : player_(frequency_hz, duration_ms) {}
 
-Translator::Translator(const std::string& dot_wav, const std::string& dash_wav)
-    : player_(dot_wav, dash_wav) {}
-
-void Translator::ToAudio(const std::vector<std::string>& words) const {
+void Translator::ToAudio(const std::vector<std::string>& words) {
     for (const std::string& word : words) {
         for (const char& c : word) {
             if (kMorseToAscii.count(c)) {
                 for (const char& morse_char : kMorseToAscii.at(c)) {
-                    PlaySound(morse_char);
+                    if ('.' == morse_char) {
+                        player_.PlayDot();
+                    } else {
+                        player_.PlayDash();
+                    }
+                    Delay(player_.DotDuration() * DelayMultiplier::kSymbol);
                 }
             }
-            Delay(player_.DotDuration() *
-                  static_cast<double>(DelayMultiplier::kChar));
+            Delay(player_.DotDuration() * DelayMultiplier::kChar);
         }
-        Delay(player_.DotDuration() *
-              static_cast<double>(DelayMultiplier::kWord));
+        Delay(player_.DotDuration() * DelayMultiplier::kWord);
     }
 }
 

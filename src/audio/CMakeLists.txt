@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.13...3.25)
 
 find_package(SDL2 REQUIRED)
-find_package(SDL2_mixer REQUIRED)
 
 project(audio
     DESCRIPTION "morse code WAV audio player"
@@ -21,5 +20,4 @@ target_include_directories(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
     PRIVATE SDL2::Main
-    PRIVATE SDL2::Mixer
 )
