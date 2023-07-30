@@ -1,6 +1,7 @@
 #ifndef IO_HPP_
 #define IO_HPP_
 
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -8,7 +9,7 @@ namespace morse {
 namespace io {
 
 /** @brief Read a list of words from STDIN. */
-std::vector<std::string> ReadWords();
+std::vector<std::string> ReadWords(std::istream& is = std::cin);
 
 /**
  * @brief Read a list of words from the file at \p filepath

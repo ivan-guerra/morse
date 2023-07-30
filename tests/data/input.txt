@@ -1,0 +1,2 @@
+Hello, World.
+This is a file used to test the translator's capabilities.

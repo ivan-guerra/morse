@@ -20,11 +20,11 @@ static std::vector<std::string> ParseWords(const std::string& data) {
     return words;
 }
 
-std::vector<std::string> ReadWords() {
+std::vector<std::string> ReadWords(std::istream& is) {
     std::string data;
     std::string line;
-    while (std::getline(std::cin, line)) {
-        data += line;
+    while (std::getline(is, line)) {
+        data += line + "\n"; /* append the newline getline discards */
     }
     return ParseWords(data);
 }
