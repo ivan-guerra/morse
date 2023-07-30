@@ -18,7 +18,8 @@ class MorseCodeAudioPlayer {
      *                         default, the duration of a dash is 3x the
      *                         duration of a dot.
      *
-     * @throws std::runtime_error When the audio system cannot be initialized.
+     * @throws std::runtime_error When the audio system cannot be initialized or
+     *                            frequency/duration is not positive.
      */
     explicit MorseCodeAudioPlayer(double frequency_hz = kDefaultFrequencyHz,
                                   int duration_ms = kDefaultDurationMs);
@@ -38,7 +39,12 @@ class MorseCodeAudioPlayer {
     /** @brief Returns the duration of the dot soundbite in milliseconds. */
     int DotDuration() const { return dot_duration_ms_; }
 
-    /** @brief Returns the duration of the dash soundbite in milliseconds. */
+    /**
+     * @brief Returns the duration of the dash soundbite in milliseconds.
+     *
+     * @details According to the Morse code wiki, the duration of a dash is 3
+     *          times the duration of a dot by default.
+     */
     int DashDuration() const { return dash_duration_ms_; }
 
    private:
