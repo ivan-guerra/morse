@@ -15,3 +15,4 @@ set_target_properties(gmock_main PROPERTIES FOLDER extern)
 
 add_subdirectory(audio)
 add_subdirectory(io)
+add_subdirectory(translator)

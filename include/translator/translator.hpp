@@ -22,7 +22,8 @@ class Translator {
      *                         default, the duration of a dash is 3x the
      *                         duration of a dot.
      *
-     * @throws std::runtime_error When the audio system cannot be initialized.
+     * @throws std::runtime_error When the audio system cannot be initialized or
+     *                            frequency/duration is not positive.
      */
     explicit Translator(double frequency_hz = kDefaultFrequencyHz,
                         int duration_ms = kDefaultDurationMs);
