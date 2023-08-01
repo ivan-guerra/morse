@@ -42,21 +42,22 @@ void PrintUsage() {
               << std::endl;
 
     std::cout << "OPTIONS" << std::endl;
-    std::cout << "\t-i,--input-ascii\n\t\tpath to an input ASCII text file"
+    std::cout << "\t-i,--input-ascii FILE\n\t\tpath to an input ASCII text file"
               << std::endl;
-    std::cout << "\t-o,--output-ascii\n\t\tpath to output Morse coded input"
-              << std::endl;
+    std::cout
+        << "\t-o,--output-ascii FILE\n\t\tpath to output Morse coded input"
+        << std::endl;
     std::cout << "\t-d,--disable-audio\n\t\tdisable Morse code audio player"
               << std::endl;
     std::cout << "\t-p,--print-code\n\t\tprint Morse encoding to STDOUT"
               << std::endl;
     std::cout
-        << "\t-u,--pitch\n\t\ta integer percentage value in the range "
+        << "\t-u,--pitch NUM\n\t\ta integer percentage value in the range "
            "[0, 100], the higher the \n\t\tpercentage the higher the pitch of "
            "each dot/dash (default 50)"
         << std::endl;
     std::cout
-        << "\t-l,--duration\n\t\ta integer percentage value in the range "
+        << "\t-l,--duration NUM\n\t\ta integer percentage value in the range "
            "[0, 100], the higher the \n\t\tpercentage the longer each dot/dash "
            "tone lasts (default 25)"
         << std::endl;
