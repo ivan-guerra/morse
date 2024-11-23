@@ -46,7 +46,7 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
-    let _config = morse::Config::new(
+    let config = morse::Config::new(
         args.input_ascii,
         args.output_ascii,
         args.disable_audio,
@@ -54,8 +54,8 @@ fn main() {
         args.pitch,
         args.duration,
     );
-    // if let Err(e) = cellular_textures::run(&config) {
-    //     eprintln!("error: {}", e);
-    //     std::process::exit(1);
-    // }
+    if let Err(e) = morse::run(&config) {
+        eprintln!("error: {}", e);
+        std::process::exit(1);
+    }
 }
