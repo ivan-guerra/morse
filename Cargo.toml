@@ -1,0 +1,8 @@
+[package]
+name = "morse"
+version = "0.1.0"
+edition = "2021"
+description = "Convert ASCII to text to morse code audio and text."
+license = "Unlicense"
+
+[dependencies]
