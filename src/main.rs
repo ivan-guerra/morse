@@ -29,19 +29,19 @@ struct Args {
         short = 'u',
         long,
         default_value_t = 50,
-        value_parser = clap::value_parser!(u32).range(0..=100),
+        value_parser = clap::value_parser!(u8).range(0..=100),
         help = "a integer percentage value, the higher the percentage the higher the pitch of each dot/dash"
     )]
-    pitch: u32,
+    pitch: u8,
 
     #[arg(
         short = 'l',
         long,
-        default_value_t = 25,
-        value_parser = clap::value_parser!(u32).range(0..=100),
+        default_value_t = 80,
+        value_parser = clap::value_parser!(u8).range(0..=100),
         help = "a integer percentage value, the higher the percentage the longer of each dot/dash tone lasts"
     )]
-    duration: u32,
+    duration: u8,
 }
 
 fn main() {

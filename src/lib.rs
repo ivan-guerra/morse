@@ -1,4 +1,7 @@
 use lazy_static::lazy_static;
+use rodio::source::{SineWave, Source};
+use rodio::{OutputStream, Sink};
+use std::time::Duration;
 use std::{collections::HashMap, io::Read};
 
 pub struct Config {
@@ -6,8 +9,7 @@ pub struct Config {
     pub output_ascii: Option<std::path::PathBuf>,
     pub disable_audio: bool,
     pub print_code: bool,
-    pub pitch: u32,
-    pub duration: u32,
+    pub audio: MorseCodeAudioPlayer,
 }
 
 impl Config {
@@ -16,17 +18,87 @@ impl Config {
         output_ascii: Option<std::path::PathBuf>,
         disable_audio: bool,
         print_code: bool,
-        pitch: u32,
-        duration: u32,
+        pitch: u8,
+        duration: u8,
     ) -> Self {
         Self {
             input_ascii,
             output_ascii,
             disable_audio,
             print_code,
-            pitch,
-            duration,
+            audio: MorseCodeAudioPlayer::new(pitch, duration),
         }
+    }
+}
+
+pub struct MorseCodeAudioPlayer {
+    pitch: f32,
+    dot_duration: f32,
+    dash_duration: f32,
+}
+
+impl MorseCodeAudioPlayer {
+    pub fn new(pitch: u8, duration: u8) -> Self {
+        Self {
+            pitch: f32::from(pitch),
+            dot_duration: f32::from(duration),
+            dash_duration: f32::from(duration) * 3.0,
+        }
+    }
+
+    pub fn play(&self, morse: &str) -> Result<(), Box<dyn std::error::Error>> {
+        const MIN_PITCH: f32 = 200.0; // Lowest frequency (A3)
+        const MAX_PITCH: f32 = 800.0; // Highest frequency (A5)
+        const MIN_DURATION: f32 = 0.050; // Minimum duration in seconds
+        const MAX_DURATION: f32 = 0.250; // Maximum duration in seconds
+        const PAUSE_SAMPLE_RATE: u32 = 44100;
+
+        // Calculate frequency and duration based on user input
+        let frequency = MIN_PITCH + (self.pitch / 100.0) * (MAX_PITCH - MIN_PITCH);
+        let dot_duration_secs =
+            MIN_DURATION + (self.dot_duration / 100.0) * (MAX_DURATION - MIN_DURATION);
+        let dash_duration_secs =
+            MIN_DURATION + (self.dash_duration / 100.0) * (MAX_DURATION - MIN_DURATION);
+
+        // Initialize audio output stream and sink
+        let (_stream, stream_handle) = OutputStream::try_default()?;
+        let sink = Sink::try_new(&stream_handle)?;
+
+        // Define pause sources
+        let pause_config = (1, PAUSE_SAMPLE_RATE);
+        let symbol_pause = rodio::source::Zero::<f32>::new(pause_config.0, pause_config.1)
+            .take_duration(Duration::from_millis(self.dot_duration as u64));
+        let char_pause = rodio::source::Zero::<f32>::new(pause_config.0, pause_config.1)
+            .take_duration(Duration::from_millis(self.dot_duration as u64 * 3));
+        let word_pause = rodio::source::Zero::<f32>::new(pause_config.0, pause_config.1)
+            .take_duration(Duration::from_millis(self.dot_duration as u64 * 7));
+
+        // Process morse code symbols
+        for c in morse.chars() {
+            match c {
+                '.' => {
+                    sink.append(
+                        SineWave::new(frequency)
+                            .take_duration(Duration::from_secs_f32(dot_duration_secs)),
+                    );
+                    sink.append(symbol_pause.clone());
+                }
+                '-' => {
+                    sink.append(
+                        SineWave::new(frequency)
+                            .take_duration(Duration::from_secs_f32(dash_duration_secs)),
+                    );
+                    sink.append(symbol_pause.clone());
+                }
+                ' ' => sink.append(char_pause.clone()),
+                '/' => sink.append(word_pause.clone()),
+                _ => (),
+            }
+        }
+
+        // Sleep until the end of the audio stream
+        sink.sleep_until_end();
+        Ok(())
     }
 }
 
@@ -84,16 +156,6 @@ fn read_text(path: &Option<std::path::PathBuf>) -> Result<String, Box<dyn std::e
     }
 }
 
-fn write_text(path: &Option<std::path::PathBuf>, text: &str) -> Result<(), std::io::Error> {
-    match path {
-        Some(path) => std::fs::write(path, text),
-        None => {
-            println!("{}", text);
-            Ok(())
-        }
-    }
-}
-
 pub fn ascii_to_morse(ascii: &str) -> String {
     // 1. Translate valid input chars to their International Morse Code dot/dash representation.
     // 2. Display invalid input chars as #.
@@ -113,9 +175,24 @@ pub fn ascii_to_morse(ascii: &str) -> String {
 }
 
 pub fn run(config: &Config) -> Result<(), Box<dyn std::error::Error>> {
+    // Read ASCII text from file or stdin
     let text = read_text(&config.input_ascii)?;
     let morse = ascii_to_morse(&text);
-    write_text(&config.output_ascii, &morse)?;
+
+    // Write Morse code to file if output path is provided
+    if let Some(output_ascii) = &config.output_ascii {
+        std::fs::write(output_ascii, &morse)?;
+    }
+
+    // Print Morse code to console if enabled
+    if config.print_code {
+        println!("{}", morse);
+    }
+
+    // Play Morse code audio if enabled
+    if !config.disable_audio {
+        config.audio.play(&morse)?;
+    }
 
     Ok(())
 }

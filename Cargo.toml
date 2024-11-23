@@ -8,3 +8,4 @@ license = "Unlicense"
 [dependencies]
 clap = {version = "4.5.21", features = ["derive"]}
 lazy_static = "1.5"
+rodio = "0.20.1"
