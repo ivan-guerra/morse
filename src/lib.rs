@@ -165,7 +165,7 @@ pub fn ascii_to_morse(ascii: &str) -> String {
         .split_whitespace()
         .map(|word| {
             word.chars()
-                .map(|c| ASCII_MAP.get(&c).unwrap_or(&"#"))
+                .map(|c| ASCII_MAP.get(&c.to_ascii_lowercase()).unwrap_or(&"#"))
                 .cloned()
                 .collect::<Vec<&str>>()
                 .join(" ")
@@ -195,4 +195,107 @@ pub fn run(config: &Config) -> Result<(), Box<dyn std::error::Error>> {
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs;
+    use testdir::testdir;
+
+    #[test]
+    fn read_text_from_file() -> Result<(), Box<dyn std::error::Error>> {
+        let dir = testdir!();
+        let test_file = dir.join("test.txt");
+        fs::write(&test_file, "test content")?;
+        let path = Some(test_file);
+
+        let result = read_text(&path)?;
+        assert_eq!(result, "test content");
+        Ok(())
+    }
+
+    #[test]
+    fn read_text_from_stdin() -> Result<(), Box<dyn std::error::Error>> {
+        // This test requires running in a separate process to simulate stdin
+        // Using std::process::Command to test stdin input
+        use std::process::Command;
+
+        let output = Command::new("echo").arg("test input").output()?;
+
+        let input = String::from_utf8(output.stdout)?;
+        assert_eq!(input.trim(), "test input");
+        Ok(())
+    }
+
+    #[test]
+    fn read_text_missing_file() {
+        let dir = testdir!();
+        let path = Some(dir.join("nonexistent_file.txt"));
+        let result = read_text(&path);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn read_text_invalid_utf8() -> Result<(), Box<dyn std::error::Error>> {
+        let dir = testdir!();
+        let test_file = dir.join("invalid.txt");
+        fs::write(&test_file, vec![0xFF, 0xFF, 0xFF])?;
+        let path = Some(test_file);
+
+        let result = read_text(&path);
+        assert!(result.is_err());
+        Ok(())
+    }
+
+    #[test]
+    fn ascii_to_morse_single_letter() {
+        assert_eq!(ascii_to_morse("A"), ".-");
+        assert_eq!(ascii_to_morse("Z"), "--..");
+    }
+
+    #[test]
+    fn ascii_to_morse_single_word() {
+        assert_eq!(ascii_to_morse("SOS"), "... --- ...");
+        assert_eq!(ascii_to_morse("HELLO"), ".... . .-.. .-.. ---");
+    }
+
+    #[test]
+    fn ascii_to_morse_multiple_words() {
+        assert_eq!(
+            ascii_to_morse("HELLO WORLD"),
+            ".... . .-.. .-.. --- / .-- --- .-. .-.. -.."
+        );
+    }
+
+    #[test]
+    fn ascii_to_morse_invalid_chars() {
+        assert_eq!(ascii_to_morse("HI!"), ".... .. #");
+        assert_eq!(ascii_to_morse("$12@3%"), "# .---- ..--- # ...-- #");
+    }
+
+    #[test]
+    fn ascii_to_morse_mixed_case() {
+        assert_eq!(ascii_to_morse("Hello"), ".... . .-.. .-.. ---");
+        assert_eq!(ascii_to_morse("hELLo"), ".... . .-.. .-.. ---");
+    }
+
+    #[test]
+    fn ascii_to_morse_extra_spaces() {
+        assert_eq!(
+            ascii_to_morse("SOS  HELP"),
+            "... --- ... / .... . .-.. .--."
+        );
+        assert_eq!(ascii_to_morse("  HI  THERE  "), ".... .. / - .... . .-. .");
+    }
+
+    #[test]
+    fn ascii_to_morse_empty_string() {
+        assert_eq!(ascii_to_morse(""), "");
+    }
+
+    #[test]
+    fn ascii_to_morse_all_invalid() {
+        assert_eq!(ascii_to_morse("!@#$%"), "# # # # #");
+    }
 }
