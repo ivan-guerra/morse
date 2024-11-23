@@ -1,14 +1,25 @@
+//! A Morse code converter and audio player library
+//!
+//! This library provides functionality to convert ASCII text to International Morse Code,
+//! write the converted code to files, and play it as audio signals. It supports both
+//! file-based and standard input/output operations.
 use lazy_static::lazy_static;
 use rodio::source::{SineWave, Source};
 use rodio::{OutputStream, Sink};
 use std::time::Duration;
 use std::{collections::HashMap, io::Read};
 
+/// Configuration struct for the Morse code converter
 pub struct Config {
+    /// Path to the input ASCII text file
     pub input_ascii: Option<std::path::PathBuf>,
+    /// Path to the output ASCII file where Morse code will be written
     pub output_ascii: Option<std::path::PathBuf>,
+    /// Flag to disable audio output
     pub disable_audio: bool,
+    /// Flag to enable printing of Morse code to stdout
     pub print_code: bool,
+    /// Audio player instance for Morse code playback
     pub audio: MorseCodeAudioPlayer,
 }
 
@@ -31,9 +42,13 @@ impl Config {
     }
 }
 
+/// Audio playback configuration for Morse code signals
 pub struct MorseCodeAudioPlayer {
+    /// Frequency in Hz for the audio tone
     pitch: f32,
+    /// Duration in seconds for a dot signal
     dot_duration: f32,
+    /// Duration in seconds for a dash signal
     dash_duration: f32,
 }
 
@@ -46,6 +61,15 @@ impl MorseCodeAudioPlayer {
         }
     }
 
+    /// Plays the provided Morse code string as audio signals
+    ///
+    /// # Arguments
+    ///
+    /// * `morse` - A string containing Morse code symbols (., -, spaces, and /)
+    ///
+    /// # Returns
+    ///
+    /// * `Result<(), Box<dyn std::error::Error>>` - Ok if playback succeeds, Err otherwise
     pub fn play(&self, morse: &str) -> Result<(), Box<dyn std::error::Error>> {
         const MIN_PITCH: f32 = 200.0; // Lowest frequency (A3)
         const MAX_PITCH: f32 = 800.0; // Highest frequency (A5)
@@ -145,6 +169,15 @@ lazy_static! {
     };
 }
 
+/// Reads text content from a file or stdin if no file path is provided
+///
+/// # Arguments
+///
+/// * `path` - Optional PathBuf containing the path to the input file
+///
+/// # Returns
+///
+/// * `Result<String, Box<dyn std::error::Error>>` - The content as a String if successful, or an error
 fn read_text(path: &Option<std::path::PathBuf>) -> Result<String, Box<dyn std::error::Error>> {
     match path {
         Some(path) => Ok(std::fs::read_to_string(path)?),
@@ -156,11 +189,23 @@ fn read_text(path: &Option<std::path::PathBuf>) -> Result<String, Box<dyn std::e
     }
 }
 
+/// Converts ASCII text to International Morse Code
+///
+/// # Arguments
+///
+/// * `ascii` - A string slice containing ASCII text to convert
+///
+/// # Returns
+///
+/// * `String` - The Morse code representation of the input text
+///
+/// # Rules
+///
+/// 1. Valid ASCII characters are converted to their Morse code equivalents
+/// 2. Invalid characters are represented as '#'
+/// 3. Characters within a word are separated by a single space
+/// 4. Words are separated by ' / ' (forward slash with spaces)
 pub fn ascii_to_morse(ascii: &str) -> String {
-    // 1. Translate valid input chars to their International Morse Code dot/dash representation.
-    // 2. Display invalid input chars as #.
-    // 3. Separate characters in a word with a single space.
-    // 4. Separate words by a forward slash surrounded by single spaces.
     ascii
         .split_whitespace()
         .map(|word| {
@@ -174,6 +219,23 @@ pub fn ascii_to_morse(ascii: &str) -> String {
         .join(" / ")
 }
 
+/// Executes the Morse code conversion and playback process
+///
+/// # Arguments
+///
+/// * `config` - Reference to the Config struct containing runtime settings
+///
+/// # Returns
+///
+/// * `Result<(), Box<dyn std::error::Error>>` - Ok if all operations succeed, Err otherwise
+///
+/// # Operations
+///
+/// 1. Reads input text from file or stdin
+/// 2. Converts ASCII text to Morse code
+/// 3. Writes Morse code to output file if specified
+/// 4. Prints Morse code to console if enabled
+/// 5. Plays audio representation if not disabled
 pub fn run(config: &Config) -> Result<(), Box<dyn std::error::Error>> {
     // Read ASCII text from file or stdin
     let text = read_text(&config.input_ascii)?;
